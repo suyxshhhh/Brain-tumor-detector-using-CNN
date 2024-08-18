@@ -1,0 +1,41 @@
+from tensorflow.keras.models import  load_model # type: ignore
+import numpy as np # type: ignore
+from tensorflow.keras.preprocessing import image # type: ignore
+import matplotlib.pyplot as plt # type: ignore
+
+
+# Load the model from the Keras format
+model = load_model('brain_tumor_detector.keras')
+
+# Class labels
+class_labels = ['Glioma', 'Meningioma', 'No Tumor', 'Pituitary']
+
+
+# Function to load and preprocess an image
+def prepare_image(img_path):
+    img = image.load_img(img_path, target_size = (150, 150))  # Resize image to 150x150 pixels
+    img_array = image.img_to_array(img)  # Convert image to numpy array
+    img_array = np.expand_dims(img_array, axis = 0)  # Add an extra dimension for batch size
+    img_array /= 255.0  # Normalize the image data to [0, 1]
+    return img_array
+
+
+# Function to make a prediction
+def predict_tumor(img_path):
+    img_array = prepare_image(img_path)
+    prediction = model.predict(img_array)
+    predicted_class = np.argmax(prediction, axis=1)
+    class_name = class_labels[predicted_class[0]]
+    
+    # Display the image and prediction
+    plt.imshow(image.load_img(img_path))
+    plt.title(f'Predicted: {class_name}')
+    plt.show()
+
+    return class_name
+
+
+# Example usage:
+image_path = 'image.jpg'
+predicted_class = predict_tumor(image_path)
+print(f'The model predicts: {predicted_class}')
